@@ -264,16 +264,31 @@ public class Level {
      */
     private void updateObservers() {
         if (!isAnyPlayerAlive()) {
-            for (LevelObserver observer : observers) {
-                observer.levelLost();
-            }
+            notifyLevelLost();
         }
         if (remainingPellets() == 0) {
-            for (LevelObserver observer : observers) {
-                observer.levelWon();
-            }
+            notifyLevelWon();
         }
     }
+
+    /**
+     * Notifies the observers that the level has been lost.
+     */
+    private void notifyLevelLost() {
+        for (LevelObserver observer : observers) {
+            observer.levelLost();
+        }
+    }
+
+    /**
+     * Notifies the observers that the level has been won.
+     */
+    private void notifyLevelWon() {
+        for (LevelObserver observer : observers) {
+            observer.levelWon();
+        }
+    }
+
 
     /**
      * Returns <code>true</code> iff at least one of the players in this level
@@ -299,15 +314,16 @@ public class Level {
     public int remainingPellets() {
         Board board = getBoard();
         int pellets = 0;
+        List<Unit> allUnits = new ArrayList<>();
         for (int x = 0; x < board.getWidth(); x++) {
             for (int y = 0; y < board.getHeight(); y++) {
-                for (Unit unit : board.squareAt(x, y).getOccupants()) {
-                    if (unit instanceof Pellet) {
-                        pellets++;
-                    }
-                }
+                allUnits.addAll(board.squareAt(x, y).getOccupants());
             }
         }
+
+        pellets = (int) allUnits.stream()
+            .filter(unit -> unit instanceof Pellet)
+            .count();
         assert pellets >= 0;
         return pellets;
     }
