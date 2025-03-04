@@ -313,7 +313,7 @@ public class Level {
      */
     public int remainingPellets() {
         Board board = getBoard();
-        int pellets = 0;
+        int pellets;
         List<Unit> allUnits = new ArrayList<>();
         for (int x = 0; x < board.getWidth(); x++) {
             for (int y = 0; y < board.getHeight(); y++) {
