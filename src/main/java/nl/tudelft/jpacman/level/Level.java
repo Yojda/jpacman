@@ -313,7 +313,7 @@ public class Level {
      */
     public int remainingPellets() {
         Board board = getBoard();
-        int pellets;
+        int nbPellets;
         List<Unit> allUnits = new ArrayList<>();
         for (int x = 0; x < board.getWidth(); x++) {
             for (int y = 0; y < board.getHeight(); y++) {
@@ -321,11 +321,11 @@ public class Level {
             }
         }
 
-        pellets = (int) allUnits.stream()
+        nbPellets = (int) allUnits.stream()
             .filter(unit -> unit instanceof Pellet)
             .count();
-        assert pellets >= 0;
-        return pellets;
+        assert nbPellets >= 0;
+        return nbPellets;
     }
 
     /**
