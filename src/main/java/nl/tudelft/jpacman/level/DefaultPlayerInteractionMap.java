@@ -17,7 +17,7 @@ import nl.tudelft.jpacman.points.PointCalculator;
  */
 public class DefaultPlayerInteractionMap implements CollisionMap {
 
-    private PointCalculator pointCalculator;
+    private final PointCalculator pointCalculator;
 
     private final CollisionMap collisions = defaultCollisions();
 
