@@ -14,6 +14,13 @@ import nl.tudelft.jpacman.sprite.Sprite;
  */
 public class Player extends Unit {
 
+    private static final int STARTING_HP = 3;
+
+    /**
+     * The amount of heal points this player has.
+     */
+    private int hp;
+
     /**
      * The amount of points accumulated by this player.
      */
@@ -29,10 +36,6 @@ public class Player extends Unit {
      */
     private final AnimatedSprite deathSprite;
 
-    /**
-     * <code>true</code> iff this player is alive.
-     */
-    private boolean alive;
 
     /**
      * {@link Unit} iff this player died by collision, <code>null</code> otherwise.
@@ -48,11 +51,20 @@ public class Player extends Unit {
      *            The sprite to be shown when this player dies.
      */
     protected Player(Map<Direction, Sprite> spriteMap, AnimatedSprite deathAnimation) {
+        this.hp = STARTING_HP;
         this.score = 0;
-        this.alive = true;
         this.sprites = spriteMap;
         this.deathSprite = deathAnimation;
         deathSprite.setAnimating(false);
+    }
+
+    /**
+     * Returns the amount of heal points this player has.
+     *
+     * @return The amount of heal points this player has.
+     */
+    public int getHP() {
+        return hp;
     }
 
     /**
@@ -61,13 +73,13 @@ public class Player extends Unit {
      * @return <code>true</code> iff the player is alive.
      */
     public boolean isAlive() {
-        return alive;
+        return this.hp > 0;
     }
 
     /**
      * Sets whether this player is alive or not.
      *
-     * If the player comes back alive, the {@link killer} will be reset.
+     * If the player comes back alive, the {@link this.killer} will be reset.
      *
      * @param isAlive
      *            <code>true</code> iff this player is alive.
@@ -80,7 +92,7 @@ public class Player extends Unit {
         if (!isAlive) {
             deathSprite.restart();
         }
-        this.alive = isAlive;
+        this.hp = isAlive ? STARTING_HP : 0;
     }
 
     /**
@@ -127,5 +139,15 @@ public class Player extends Unit {
      */
     public void addPoints(int points) {
         score += points;
+    }
+
+    /**
+     * Removes points from the score of this player.
+     *
+     * @param hp
+     *           The amount of points to remove from the points this player already has.
+     */
+    public void removeHP(int hp) {
+        this.hp -= hp;
     }
 }
