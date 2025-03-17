@@ -82,6 +82,7 @@ public class PlayerCollisions implements CollisionMap {
         pointCalculator.collidedWithAGhost(player, ghost);
         hpCalculator.collidedWithAGhost(player, ghost);
         player.setKiller(ghost);
+        player.death();
     }
 
     /**

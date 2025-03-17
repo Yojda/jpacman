@@ -10,7 +10,7 @@ import nl.tudelft.jpacman.sprite.Sprite;
 /**
  * A player operated unit in our game.
  *
- * @author Jeroen Roosen 
+ * @author Jeroen Roosen
  */
 public class Player extends Unit {
 
@@ -20,6 +20,8 @@ public class Player extends Unit {
      * The amount of heal points this player has.
      */
     private int hp;
+
+    private boolean alive;
 
     /**
      * The amount of points accumulated by this player.
@@ -42,16 +44,16 @@ public class Player extends Unit {
      */
     private Unit killer;
 
+
     /**
      * Creates a new player with a score of 0 points.
      *
-     * @param spriteMap
-     *            A map containing a sprite for this player for every direction.
-     * @param deathAnimation
-     *            The sprite to be shown when this player dies.
+     * @param spriteMap      A map containing a sprite for this player for every direction.
+     * @param deathAnimation The sprite to be shown when this player dies.
      */
     protected Player(Map<Direction, Sprite> spriteMap, AnimatedSprite deathAnimation) {
         this.hp = STARTING_HP;
+        this.alive = true;
         this.score = 0;
         this.sprites = spriteMap;
         this.deathSprite = deathAnimation;
@@ -73,16 +75,21 @@ public class Player extends Unit {
      * @return <code>true</code> iff the player is alive.
      */
     public boolean isAlive() {
-        return this.hp > 0;
+        return this.alive;
+    }
+
+
+    public void death() {
+        this.alive = false;
+        deathSprite.restart();
     }
 
     /**
      * Sets whether this player is alive or not.
-     *
+     * <p>
      * If the player comes back alive, the {@link this.killer} will be reset.
      *
-     * @param isAlive
-     *            <code>true</code> iff this player is alive.
+     * @param isAlive <code>true</code> iff this player is alive.
      */
     public void setAlive(boolean isAlive) {
         if (isAlive) {
@@ -92,7 +99,7 @@ public class Player extends Unit {
         if (!isAlive) {
             deathSprite.restart();
         }
-        this.hp = isAlive ? STARTING_HP : 0;
+        this.alive = isAlive;
     }
 
     /**
@@ -110,7 +117,7 @@ public class Player extends Unit {
      * @param killer is set if collision with ghost happens.
      */
     public void setKiller(Unit killer) {
-        this.killer =  killer;
+        this.killer = killer;
     }
 
     /**
@@ -133,9 +140,8 @@ public class Player extends Unit {
     /**
      * Adds points to the score of this player.
      *
-     * @param points
-     *            The amount of points to add to the points this player already
-     *            has.
+     * @param points The amount of points to add to the points this player already
+     *               has.
      */
     public void addPoints(int points) {
         score += points;
@@ -144,10 +150,10 @@ public class Player extends Unit {
     /**
      * Removes points from the score of this player.
      *
-     * @param hp
-     *           The amount of points to remove from the points this player already has.
+     * @param hp The amount of points to remove from the points this player already has.
      */
     public void removeHP(int hp) {
+        System.out.println("Player lost " + hp + " hp");
         this.hp -= hp;
     }
 }
