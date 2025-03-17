@@ -151,7 +151,7 @@ public class AnimatedSprite implements Sprite {
                 if (looping) {
                     current %= animationFrames.length;
                 } else if (current == animationFrames.length) {
-                    animating = false;
+                    setAnimating(false);
                 }
             }
         } else {
