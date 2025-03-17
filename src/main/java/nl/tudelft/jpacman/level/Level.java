@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -59,6 +60,11 @@ public class Level {
     private final List<Square> startSquares;
 
     /**
+     * Save the initial position of the ghost
+     */
+    private final Map<Ghost, Square> ghostStartSquares;
+
+    /**
      * The start current selected starting square.
      */
     private int startSquareIndex;
@@ -99,8 +105,10 @@ public class Level {
         this.board = board;
         this.inProgress = false;
         this.npcs = new HashMap<>();
+        this.ghostStartSquares = new HashMap<>();
         for (Ghost ghost : ghosts) {
             npcs.put(ghost, null);
+            ghostStartSquares.put(ghost, ghost.getSquare());
         }
         this.startSquares = startPositions;
         this.startSquareIndex = 0;
@@ -195,6 +203,22 @@ public class Level {
     }
 
     /**
+     * Replace the player and the npc at their initial places
+     */
+    public void resetPositions() {
+        // Reset player position
+        for (Player player : players) {
+            player.occupy(startSquares.get(startSquareIndex));
+        }
+
+        // Reset ghost positions
+        for (Entry<Ghost, Square> entry : ghostStartSquares.entrySet()) {
+            Ghost ghost = entry.getKey();
+            ghost.occupy(entry.getValue());
+        }
+    }
+
+    /**
      * Starts or resumes this level, allowing movement and (re)starting the
      * NPCs.
      */
@@ -214,9 +238,7 @@ public class Level {
             if (isInProgress()) {
                 return;
             }
-            inProgress = true;
-            startNPCs();
-            updateObservers();
+            resetPositions();
         }
     }
 
@@ -270,9 +292,10 @@ public class Level {
         return inProgress;
     }
 
+    /**
+     * Revive players if they still have remaining lives.
+     */
     public void revivePlayers() {
-
-        System.out.println("reviving players");
         for (Player player : players) {
             player.revive();
         }
@@ -285,16 +308,32 @@ public class Level {
         if (!isAnyPlayerAlive()) {
             if (isAnyPlayerHavingLives()) {
                 notifyPlayerDied();
-                revivePlayers();
-                notifyPlayerRevive();
+
+                // Revive players after the latest death animation.
+                waitForAllAnimations().thenRun(() -> {
+                    revivePlayers();
+                    notifyPlayerRevive();
+                });
+
             } else {
                 notifyLevelLost();
             }
         }
+
         if (remainingPellets() == 0) {
             notifyLevelWon();
         }
+    }
 
+    /**
+     * Wait for all player animations to complete before continuing.
+     */
+    private CompletableFuture<Void> waitForAllAnimations() {
+        List<Player> players = this.players; // Liste de tous les joueurs
+
+        // Collecte sous forme de liste
+        return CompletableFuture.allOf(players.stream()
+            .map(Player::getAnimationFuture).toArray(CompletableFuture[]::new));
     }
 
     /**
@@ -306,12 +345,18 @@ public class Level {
         }
     }
 
+    /**
+     * Notifies the observers that a player died.
+     */
     private void notifyPlayerDied() {
         for (LevelObserver observer : observers) {
             observer.playerDied();
         }
     }
 
+    /**
+     * Notifies the observers that a player have been revived.
+     */
     private void notifyPlayerRevive() {
         for (LevelObserver observer : observers) {
             observer.playerRevive();
@@ -435,8 +480,16 @@ public class Level {
          */
         void levelLost();
 
+        /**
+         * A player died. The level is stopped and the death animation is run. Instead of levelWon,
+         * the game can be resumed.
+         */
         void playerDied();
 
+        /**
+         * A player have been revived. After a player death (the player still have a life)
+         * and after the death animation, a player can be revived.
+         */
         void playerRevive();
     }
 }

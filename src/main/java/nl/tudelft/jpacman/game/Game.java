@@ -58,15 +58,16 @@ public abstract class Game implements LevelObserver {
         }
     }
 
-
+    /**
+     * Run this when the players have lost a life, they need to be revived
+     */
     public void revive() {
         synchronized (progressLock) {
             if (isInProgress()) {
                 return;
             }
             if (getLevel().isAnyPlayerAlive() && getLevel().remainingPellets() > 0) {
-                inProgress = true;
-                getLevel().addObserver(this);
+                inProgress = false;
                 getLevel().revive();
             }
         }

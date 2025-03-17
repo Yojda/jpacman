@@ -1,6 +1,7 @@
 package nl.tudelft.jpacman.level;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import nl.tudelft.jpacman.board.Direction;
 import nl.tudelft.jpacman.board.Unit;
@@ -78,14 +79,18 @@ public class Player extends Unit {
         return this.alive;
     }
 
+    /**
+     * Change isAlive status if a player still have lives.
+     */
     public void revive() {
         if (this.getHP() > 0) {
-            System.out.println("Setting alive");
             setAlive(true);
         }
     }
 
-
+    /**
+     * Handle the death of a player
+     */
     public void death() {
         this.alive = false;
         deathSprite.restart();
@@ -138,6 +143,14 @@ public class Player extends Unit {
     }
 
     /**
+     *
+     * @return the locker of the animation.
+     */
+    public CompletableFuture<Void> getAnimationFuture() {
+        return deathSprite.getAnimationFuture();
+    }
+
+    /**
      * Adds points to the score of this player.
      *
      * @param points The amount of points to add to the points this player already
@@ -153,7 +166,6 @@ public class Player extends Unit {
      * @param hp The amount of points to remove from the points this player already has.
      */
     public void removeHP(int hp) {
-        System.out.println("Player lost " + hp + " hp");
         this.hp -= hp;
     }
 }
