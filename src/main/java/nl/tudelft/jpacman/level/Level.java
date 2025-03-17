@@ -209,6 +209,17 @@ public class Level {
         }
     }
 
+    public void revive() {
+        synchronized (startStopLock) {
+            if (isInProgress()) {
+                return;
+            }
+            inProgress = true;
+            startNPCs();
+            updateObservers();
+        }
+    }
+
     /**
      * Stops or pauses this level, no longer allowing any movement on the board
      * and stopping all NPCs.
@@ -259,16 +270,31 @@ public class Level {
         return inProgress;
     }
 
+    public void revivePlayers() {
+
+        System.out.println("reviving players");
+        for (Player player : players) {
+            player.revive();
+        }
+    }
+
     /**
      * Updates the observers about the state of this level.
      */
     private void updateObservers() {
         if (!isAnyPlayerAlive()) {
-            notifyLevelLost();
+            if (isAnyPlayerHavingLives()) {
+                notifyPlayerDied();
+                revivePlayers();
+                notifyPlayerRevive();
+            } else {
+                notifyLevelLost();
+            }
         }
         if (remainingPellets() == 0) {
             notifyLevelWon();
         }
+
     }
 
     /**
@@ -277,6 +303,18 @@ public class Level {
     private void notifyLevelLost() {
         for (LevelObserver observer : observers) {
             observer.levelLost();
+        }
+    }
+
+    private void notifyPlayerDied() {
+        for (LevelObserver observer : observers) {
+            observer.playerDied();
+        }
+    }
+
+    private void notifyPlayerRevive() {
+        for (LevelObserver observer : observers) {
+            observer.playerRevive();
         }
     }
 
@@ -300,6 +338,15 @@ public class Level {
     public boolean isAnyPlayerAlive() {
         for (Player player : players) {
             if (player.isAlive()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isAnyPlayerHavingLives() {
+        for (Player player : players) {
+            if (player.getHP() > 0) {
                 return true;
             }
         }
@@ -387,5 +434,9 @@ public class Level {
          * this event is received.
          */
         void levelLost();
+
+        void playerDied();
+
+        void playerRevive();
     }
 }

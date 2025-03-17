@@ -58,6 +58,20 @@ public abstract class Game implements LevelObserver {
         }
     }
 
+
+    public void revive() {
+        synchronized (progressLock) {
+            if (isInProgress()) {
+                return;
+            }
+            if (getLevel().isAnyPlayerAlive() && getLevel().remainingPellets() > 0) {
+                inProgress = true;
+                getLevel().addObserver(this);
+                getLevel().revive();
+            }
+        }
+    }
+
     /**
      * Pauses the game.
      */
@@ -107,6 +121,16 @@ public abstract class Game implements LevelObserver {
     @Override
     public void levelWon() {
         stop();
+    }
+
+    @Override
+    public void playerDied() {
+        stop();
+    }
+
+    @Override
+    public void playerRevive() {
+        revive();
     }
 
     @Override

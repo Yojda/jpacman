@@ -78,6 +78,13 @@ public class Player extends Unit {
         return this.alive;
     }
 
+    public void revive() {
+        if (this.getHP() > 0) {
+            System.out.println("Setting alive");
+            setAlive(true);
+        }
+    }
+
 
     public void death() {
         this.alive = false;
@@ -92,13 +99,6 @@ public class Player extends Unit {
      * @param isAlive <code>true</code> iff this player is alive.
      */
     public void setAlive(boolean isAlive) {
-        if (isAlive) {
-            deathSprite.setAnimating(false);
-            this.killer = null;
-        }
-        if (!isAlive) {
-            deathSprite.restart();
-        }
         this.alive = isAlive;
     }
 
